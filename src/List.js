@@ -145,20 +145,6 @@ define([
         }
     };
 
-    /**
-     * Show 'Add Child' button when you zoom into the bottom node
-     * @private
-     */
-    List.prototype._createAddButton = function () {
-        var self = this;
-        this.addChildButton = Util.getDomFromHtml('<div class="add-wrapper"><a href="#">Add a child</a></div>')
-        this.frame.appendChild(this.addChildButton)
-
-        this.addChildButton.addEventListener('click', function(event){
-            self.rootNode.createChild({})
-            self.frame.removeChild(self.addChildButton)
-        })
-    };
 
     /**
      * Store history when a node is moved, removed, duplicated, etc.
@@ -183,6 +169,7 @@ define([
     };
 
     List.prototype.onRootNodeChange = function (newRootnode) {
+        var self = this
         // handle crumb
         if (newRootnode == this.veryRootNode) {
             this.crumb.hide();
@@ -191,10 +178,17 @@ define([
         }
 
         // handle add buttons
-        // todo 让这些元素的创建顺序不要影响他们最终出现在DOM中得位置
-        if (this.addBtnWrapper) {
-            this.frame.removeChild(this.addBtnWrapper);
-            this.addBtnWrapper = undefined;
+        var createButton = function(){
+            self.addChildButton = Util.getDomFromHtml('<div class="add-wrapper"><a href="#">Add a child</a></div>')
+
+            self.addChildButton.addEventListener('click', function(event){
+                self.rootNode.createChild({})
+                self.frame.removeChild(self.addChildButton)
+            })
+        }
+        if(!this.rootNode.hasChild() && !this.addChildButton){
+            createButton()
+            self.frame.appendChild(self.addChildButton)
         }
     };
     List.prototype.zoomIn = function (node, hasContent) {
@@ -213,12 +207,7 @@ define([
         });
         this.rootNode = newRootNode;
         this._createTitle(this.rootNode);
-        //this._createBread();
         this.eventMgr.fire('rootNodeChange', this.rootNode, this);
-        if (hasContent === false ||
-            (hasContent == undefined && !this.rootNode.hasChild())) {
-            this._createAddButton();
-        }
         this.creating = false;
     };
 

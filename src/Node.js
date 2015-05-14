@@ -626,7 +626,7 @@ define(['./util'],function(util){
      * Tell if the Node has children
      */
     Node.prototype.hasChild = function(){
-        return this.childs.length;
+        return this.childs.length > 0;
     };
 
     Node.prototype._onZoomIn = function(){
