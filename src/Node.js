@@ -631,10 +631,7 @@ define(['./util'],function(util){
      * @param {Node}node of the child Node
      */
     Node.prototype.removeChild = function(node){
-        var childNode = this.childrenMap[node.id];
-        this.childs = this.childs.filter(function(child){
-            return child.id != node.id;
-        });
+        this.childs.splice(node.index,1)
         //childNode.row.parentNode.removeChild(childNode.row);
         this.childrenMap[node.id] = undefined;
         this.value.children.splice(node.index, 1)
