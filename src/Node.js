@@ -494,6 +494,17 @@ define(['./util'],function(util){
                     return null;
                 }
                 break;
+
+            // get previous sibling node
+            // todo replace 'before' case
+            case 'prev':
+                if(this.index == 0 || this.isRootNode){
+                    return undefined
+                }else{
+                    return this.parent.childs[this.index-1]
+                }
+                break
+
             // get previous sibling node
             // or parent node if this is the first child
             case 'up':
@@ -745,6 +756,7 @@ define(['./util'],function(util){
      * turn the  node into a child node of the sibling node before it.
      */
     Node.prototype.indent = function(){
+        var prevNode = this.getRelativeNode('up')
         // if is not the first node
         if(this.row.previousSibling){
             var prevNode = this.getRelativeNode('before');
