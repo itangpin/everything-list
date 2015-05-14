@@ -13,13 +13,9 @@ define(['./util'],function(util){
         this.childrenMap = {};
         this.isRootNode = false;
         this.id = util.uuid();
-        // let packages extend the node and listen for events
-        if(this.app.packages.length > 0){
-            this.initPackages();
-        }
         this._createDom();
-        this.getPath();
-        this.highlighted = false;
+        this.getPath()
+        this.collapseAnimating = false
     };
 
     /*=============================================================
@@ -89,8 +85,6 @@ define(['./util'],function(util){
         this.row = row;
 
         this.setValue();
-        // tell packages they are ready to  handle DOM
-        this._onDomReady();
     };
 
     /**
@@ -119,6 +113,7 @@ define(['./util'],function(util){
                     break;
                 case 'before':
                     insertBefore(position.el)
+                    break
                 default:
                     break;
             }
@@ -460,7 +455,29 @@ define(['./util'],function(util){
         siblingNode.adjustDom({type:'before',el:this.row})
         this.parent._addChild(siblingNode, this.index-1)
         siblingNode.focus(siblingNode.contentElement)
-    }
+    }   /**
+     * Indent the Node,
+     * turn the  node into a child node of the sibling node before it.
+     */
+    Node.prototype.indent = function(){
+        var prevNode = this.getRelativeNode('prev')
+        if(prevNode){
+            this.parent.removeChildAndDom(this)
+            prevNode.appendChild(this)
+            this.parent = prevNode
+            this.focus(this.contentElement)
+        }
+        this.onValueChange(this.parent);
+    };
+
+    Node.prototype.unIndent= function(){
+        if(this.parent.isRootNode){
+            return;
+        }else{
+            this.parent.removeChildAndDom(this)
+        }
+        this.parent.addSiblingNodeAfter(this)
+    };
     /**
      * Get sibling node before/after this node,
      * get parent node,
@@ -514,42 +531,12 @@ define(['./util'],function(util){
     };
     /**
      * Add a Node as a sibling Node right after this node
-     * @param {Node} node node to moved
-     */
-    Node.prototype.addSiblingNodeBefore = function(node){
-        if(this.isRootNode){
-            // you can't add a sibling node for rootNode
-            // that's why we call it a ROOT node
-            return;
-        }
-        if(node.isRootNode){
-            // it's not a rootNode anymore after you move it
-            node.isRootNode = false;
-        }
-        if(node.parent){
-            node.parent.removeChild(node);
-        }
-        node.setParent(this.parent);
-        this.parent._addChild(node);
-        // TODO
-        // add updateDom method to Node
-        $(this.row).before(node.row);
-    };
-    /**
-     * Add a Node as a sibling Node right before this node
      * @param node
      */
     Node.prototype.addSiblingNodeAfter = function(node){
         this.parent._addChild(node,this.index+1)
         $(this.row).after(node.row)
         this.onValueChange(this.parent);
-    };
-
-    Node.prototype.addChildNodeAtHead = function(node){
-
-    };
-    Node.prototype.addChildNodeAtTail= function(){
-
     };
 
 /* ============================================================
@@ -649,15 +636,6 @@ define(['./util'],function(util){
     };
 
     /**
-     * Events handler to be over written by Packages
-     * TODO
-     * replace it with Event Manager
-     * @private
-     */
-    Node.prototype._onDomReady = function(){};
-
-
-    /**
      * Focus on the element
      * TODO: need to be rewrite
      */
@@ -681,36 +659,9 @@ define(['./util'],function(util){
     };
 
     /**
-     * Indent the Node,
-     * turn the  node into a child node of the sibling node before it.
-     */
-    Node.prototype.indent = function(){
-        var prevNode = this.getRelativeNode('prev')
-        if(prevNode){
-            this.parent.removeChildAndDom(this)
-            prevNode.appendChild(this)
-            this.parent = prevNode
-            this.focus(this.contentElement)
-        }
-        this.onValueChange(this.parent);
-    };
-
-    Node.prototype.unIndent= function(){
-        if(this.parent.isRootNode){
-            return;
-        }else{
-            this.parent.removeChildAndDom(this)
-        }
-        this.parent.addSiblingNodeAfter(this)
-    };
-
-
-
-    /**
      * Collapse the children of the Node
      * @param {boolean} recursion
      */
-    Node.prototype.collapseAnimating = false;
     Node.prototype.collapse = function(recursion){
         if(this.collapseAnimating){return;}
         this.collapseAnimating = true;
@@ -737,40 +688,10 @@ define(['./util'],function(util){
 
     };
 
-
     Node.prototype.expand = function(){};
 
-    Node.prototype._destroy = function(){
-        //this.row.parentNode.removeChild(this.row);
-    };
     Node.prototype.findChildById = function(id){
         return this.childrenMap[id];
-    };
-
-    /**
-     * Highlight node with background color when
-     * app is at 'move' mode
-     * @type {Function}
-     */
-    Node.prototype.highlight = function(){
-        this.highlighted = true;
-        this.contentElement.classList.add('highlight');
-    };
-    Node.prototype.noHighlight = function(){
-        this.highlighted = false;
-        this.contentElement.classList.remove('highlight');
-    };
-
-    Node.prototype.move = function(event){
-        event.preventDefault();
-        // move to next node
-        var nextNode = this.getRelativeNode('after');
-        if(nextNode){
-            this.noHighlight();
-            nextNode.highlight();
-            this.app.setCurentNode(nextNode);
-        }
-        return false;
     };
 
     return Node;
