@@ -632,7 +632,6 @@ define(['./util'],function(util){
      */
     Node.prototype.removeChild = function(node){
         this.childs.splice(node.index,1)
-        //childNode.row.parentNode.removeChild(childNode.row);
         this.childrenMap[node.id] = undefined;
         this.value.children.splice(node.index, 1)
         this._updateDomIndexes();
@@ -640,9 +639,9 @@ define(['./util'],function(util){
     };
 
     Node.prototype.removeChildAndDom = function(node){
-        var childNode = this.childrenMap[node.id];
-        if(childNode.row.parentNode){
-            childNode.row.parentNode.removeChild(childNode.row);
+        //var childNode = this.childrenMap[node.id];
+        if(node.row.parentNode){
+            node.row.parentNode.removeChild(node.row);
         }
         this.removeChild(node);
     };
