@@ -1,0 +1,23 @@
+.everything .project.package.editor{
+    .project-content{
+        display: none;
+    }
+    .editor{
+        margin-left: 36px;
+        padding:6px;
+        background-color: #F0F0F0;
+    }
+    .editor{
+        .title{
+            outline: none;
+        }
+    }
+}
+.everything .project.package.editor.root{
+    .editor{
+        margin-left: 50px;
+    }
+    .editor .CodeMirror{
+        height: 500px;
+    }
+}

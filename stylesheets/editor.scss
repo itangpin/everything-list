@@ -1,0 +1,52 @@
+.editor-container{
+    display: none;
+    padding-top: 100px;
+    //background-color: #F0F0F0;
+    height: 100%;
+}
+.editor-container{
+    .editor-title{
+        position: relative;
+        margin: auto;
+        width: 600px;
+        height: 50px;
+        border-bottom: 1px solid #a3a3a3;
+        outline: none;
+        font-size: 30px;
+        text-align: center;
+        background-color: #eee;
+    }
+    .editor-title:empty:before{
+        content: attr(placeholder);
+        display: block; /* For Firefox */
+        color: #999;
+        text-align: center;
+    }
+    .CodeMirror{
+        position: relative;
+        margin: 20px auto;
+        width: 600px;
+        height: 500px;
+    }
+
+    // buttons
+    .icon{
+        position: fixed;
+        top: 136px;
+        left: 30px;
+    }
+    .icon{
+        .iconfont{
+            font-size: 24px;
+            cursor: pointer;
+            //color: #0095FF;
+        }
+        .iconfont:hover{
+            color:#3498db;
+            font-weight: bold;
+        }
+        .icon-category{
+            margin-bottom: 30px;
+        }
+    }
+}

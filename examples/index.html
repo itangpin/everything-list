@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>demo</title>
+    <link rel="stylesheet" href="../stylesheets/style-build.min.css"/>
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/crel/index.js"></script>
+    <script src="../bower_components/require/index.js"></script>
+</head>
+<body>
+    <!-- container -->
+    <div class="everything"></div>
+
+    <script>
+        requirejs(["../src/list"], function(List) {
+            var listData = [
+                    {
+                        content: '写作',
+                        children: [
+                            {
+                                content: '峡谷的传说'
+                            }
+                        ]
+                    },
+                    {
+                        content: '待办',
+                        children: []
+                    }
+                ]
+            var list = new List(listData, {container: document.querySelector('.everything')})
+        });
+    </script>
+</body>
+</html>

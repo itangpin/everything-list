@@ -1,0 +1,46 @@
+//light theme for everything
+
+.everything.light{
+
+    .project-content{
+        color: #333333;
+    }
+    .project-content.highlight{
+        background-color: lightgrey;
+    }
+    .project .children{
+        border-left: 1px solid #e0e0e0;
+    }
+    .project.root>.children{
+        border-left: 0;
+    }
+
+    // function dot
+    .dot{
+        .b:hover{
+            background-color: #bbbbbb;
+        }
+        .s{
+            background-color: #666666;
+        }
+    }
+
+
+    // editor
+    .project.package.editor .title {
+        border-bottom: 1px dotted #aaa;
+    }
+    .project.package.editor > .project-content {
+        background-color: #f0f0f0;
+    }
+
+    // bread crumb
+    .bread, .crumb {
+        color: #979797;
+        border-bottom: 1px solid #cacaca;
+    }
+    .bread-link a, .crumb-link a{
+        color:gray;
+    }
+
+}
