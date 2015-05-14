@@ -288,7 +288,7 @@ define(['./util'],function(util){
      * @param node
      */
     Node.prototype.onChildValueChange = function(node){
-        this.value.children[node.index] = node.value
+        //this.value.children[node.index] = node.value
         if(this.parent){
             this.parent.onChildValueChange(this)
         }
@@ -456,10 +456,7 @@ define(['./util'],function(util){
     Node.prototype.createSiblingNodeAfter = function(){
         var siblingNode = new Node({},this.app, this.parent);
         siblingNode.adjustDom({type:'after',el:this.row});
-        this.parent._addChild(siblingNode,node.index+1);
-        if(this.parent.parent){
-            this.parent.parent.onChildValueChange(this.parent)
-        }
+        this.parent._addChild(siblingNode,this.index+1);
         siblingNode.focus(siblingNode.contentElement);
     };
     /**
@@ -615,6 +612,7 @@ define(['./util'],function(util){
             childNode.row.setAttribute('index', childNode.index)
         }
         this.childrenMap[childNode.id] = childNode;
+        this.onChildValueChange(childNode)
     };
 
     /**
