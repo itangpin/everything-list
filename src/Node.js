@@ -172,7 +172,7 @@ define(['./util'],function(util){
                 event.preventDefault();
                 // Shift + Tab
                 if(event.shiftKey){
-                    this.unindent();
+                    this.unIndent();
                 }else{
                     this.indent();
                 }
@@ -455,11 +455,8 @@ define(['./util'],function(util){
      */
     Node.prototype.createSiblingNodeAfter = function(){
         var siblingNode = new Node({},this.app, this.parent);
-        siblingNode.setParent(this.parent);
         siblingNode.adjustDom({type:'after',el:this.row});
-        // for temp use. Replace it with node.index later
-        var indexTmp = this.parent.childs.indexOf(this)
-        this.parent._addChild(siblingNode,indexTmp+1);
+        this.parent._addChild(siblingNode,node.index+1);
         if(this.parent.parent){
             this.parent.parent.onChildValueChange(this.parent)
         }
@@ -545,14 +542,8 @@ define(['./util'],function(util){
      * @param node
      */
     Node.prototype.addSiblingNodeAfter = function(node){
-        var nodeAfterThis = this.getRelativeNode('after');
-        if(nodeAfterThis != null){
-            nodeAfterThis.addSiblingNodeBefore(node);
-        }else{
-            // this is the last child of its parent node
-            this.parent.appendChild(node);
-        }
-        this.parent._updateDomIndexes();
+        this.parent._addChild(node,this.index+1)
+        $(this.row).after(node.row)
         this.onValueChange(this.parent);
     };
 
@@ -639,7 +630,6 @@ define(['./util'],function(util){
     };
 
     Node.prototype.removeChildAndDom = function(node){
-        //var childNode = this.childrenMap[node.id];
         if(node.row.parentNode){
             node.row.parentNode.removeChild(node.row);
         }
@@ -762,14 +752,13 @@ define(['./util'],function(util){
         this.onValueChange(this.parent);
     };
 
-    Node.prototype.unindent= function(){
-        if(!this.parent){
+    Node.prototype.unIndent= function(){
+        if(this.parent.isRootNode){
             return;
+        }else{
+            this.parent.removeChildAndDom(this)
         }
-        this.parent.addSiblingNodeAfter(this);
-        //TODO 有问题
-        // this.parent.removeChild(this.id);
-        this.onValueChange(this.parent);
+        this.parent.addSiblingNodeAfter(this)
     };
 
     Node.prototype.getPrevNode = function(){
