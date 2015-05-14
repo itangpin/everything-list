@@ -42,18 +42,6 @@ define(['./util'],function(util){
         return undefined;
     };
 
-    /**
-     * Reset index of each child
-     */
-    Node.prototype._updateDomIndexes = function(){
-        var childs = this.childs;
-        if(childs.length){
-            childs.forEach(function(child, index){
-                child.index = index;
-                child.row.setAttribute('childIndex',index);
-            });
-        }
-    };
 
     /**
      * Re-calculate the path of the node's parents
@@ -129,6 +117,8 @@ define(['./util'],function(util){
                 case 'append':
                     appendInside(position.el);
                     break;
+                case 'before':
+                    insertBefore(position.el)
                 default:
                     break;
             }
@@ -141,6 +131,9 @@ define(['./util'],function(util){
         }
         function appendInside(el){
             $(el).append(self.row);
+        }
+        function insertBefore(el){
+            $(el).before(self.row)
         }
     };
 
@@ -164,7 +157,8 @@ define(['./util'],function(util){
             // Shift + Enter
             if(keyNum==13 && event.shiftKey){
                 event.preventDefault();
-                this._onInsertBefore({});
+                this.createSiblingNodeBefore()
+                //this._onInsertBefore({});
                 return false;
             }
             // Tab
@@ -188,7 +182,9 @@ define(['./util'],function(util){
             if(8 == event.keyCode){
                 if(this.getContent() == ""){
                     event.preventDefault()
+                    var upNode = this.getRelativeNode('up')
                     this.parent.removeChildAndDom(this);
+                    upNode.focus(upNode.contentElement)
                 }
                 return false
             }
@@ -389,7 +385,7 @@ define(['./util'],function(util){
         if((typeof value == 'string') || value.constructor == String){
             this.content = value;
             this.contentElement.innerHTML = this.content;
-            this.onValueChange();
+            this.onContentValueChange();
         }
     }
 
@@ -459,6 +455,12 @@ define(['./util'],function(util){
         this.parent._addChild(siblingNode,this.index+1);
         siblingNode.focus(siblingNode.contentElement);
     };
+    Node.prototype.createSiblingNodeBefore = function(){
+        var siblingNode = new Node({},this.app, this.parent)
+        siblingNode.adjustDom({type:'before',el:this.row})
+        this.parent._addChild(siblingNode, this.index-1)
+        siblingNode.focus(siblingNode.contentElement)
+    }
     /**
      * Get sibling node before/after this node,
      * get parent node,
@@ -532,7 +534,6 @@ define(['./util'],function(util){
         // TODO
         // add updateDom method to Node
         $(this.row).before(node.row);
-        this.parent._updateDomIndexes();
     };
     /**
      * Add a Node as a sibling Node right before this node
@@ -575,7 +576,7 @@ define(['./util'],function(util){
      * The difference form _createChild is that
      * it would change the 'value' of the node
      * while _createChild won't because _createChild method
-     * create child from existing value
+     * create child from existing value(_addChild())
      * @param {Object} value
      */
     Node.prototype.createChild = function(value){
@@ -590,7 +591,6 @@ define(['./util'],function(util){
     Node.prototype.appendChild = function(child){
         this.childrenElement.appendChild(child.row);
         this._addChild(child);
-        //child.index = this.childs.length;
         this.onValueChange(this.parent);
     };
     /**
@@ -623,8 +623,9 @@ define(['./util'],function(util){
         this.childs.splice(node.index,1)
         this.childrenMap[node.id] = undefined;
         this.value.children.splice(node.index, 1)
-        this._updateDomIndexes();
-        this.onValueChange(this.parent);
+        if(this.parent){
+            this.parent.onChildValueChange(this)
+        }
     };
 
     Node.prototype.removeChildAndDom = function(node){
@@ -641,62 +642,6 @@ define(['./util'],function(util){
         return this.childs.length;
     };
 
-
-    /* ============================================================
-     *                   Event Handlers
-     * ============================================================*/
-
-    /**
-     * Insert a new Node before this node
-     * @param {Object} value value to initiating a node
-     */
-    Node.prototype._onInsertBefore = function(value){
-        var newNode = new Node(value,this.app,this.parent);
-        newNode.setParent(this.parent);
-        this.addSiblingNodeBefore(newNode);
-        newNode.focus(newNode.contentElement);
-        this.onValueChange(this.parent);
-        // add the action to the History(redoMgr)
-    };
-
-    /**
-     * Insert a new Node after this node
-     * @param {Object} value value to initiating a node
-     */
-    Node.prototype._onInsertAfter = function(value){
-        var newNode = new Node(value, this.app);
-        newNode.setParent(null);
-        this.addSiblingNodeAfter(newNode);
-        newNode.focus(newNode);
-        // add the action to the History
-        this.app.onAction('insertAfter',{
-            'node':newNode,
-            'afterNode':this,
-            'parent':this.parent
-        });
-        this.onValueChange(this.parent);
-    };
-    /**
-     * Indent the Node,
-     * turn the  node into a child node of the sibling node before it.
-     */
-    Node.prototype._onIndent = function(){
-        // if this node is not the first node
-        var prevNode = this.getRelativeNode('before');
-        if(prevNode){
-            prevNode.appendChild(this);
-            this.setParent(prevNode);
-        }
-        this.onValueChange(this.parent);
-    };
-    /**
-     *
-     */
-    Node.prototype._onUnshift = function(value){
-        var newNode = new Node(value, this.app);
-        newNode.setParent(this);
-        this.onValueChange(this.parent);
-    };
     Node.prototype._onZoomIn = function(){
         this.app.onAction('zoomin',{
             node:this
@@ -757,25 +702,6 @@ define(['./util'],function(util){
             this.parent.removeChildAndDom(this)
         }
         this.parent.addSiblingNodeAfter(this)
-    };
-
-    Node.prototype.getPrevNode = function(){
-        if(!this.prevNodeElement || !this.prevNode){
-            if(this.row.previousSibling){
-                this.prevNodeElement = this.row.previousSibling;
-                var prevNodeId = this.prevNodeElement.getAttribute('projectId');
-                this.prevNode = this.parent.findChildById(prevNodeId);
-                return this.getPrevNode();
-            }else{
-                // no previousSibling
-                return false;
-            }
-        }else{
-            return {
-                'el':   this.prevNodeElement,
-                'node': this.prevNode
-            }
-        }
     };
 
 
