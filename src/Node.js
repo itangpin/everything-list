@@ -756,14 +756,12 @@ define(['./util'],function(util){
      * turn the  node into a child node of the sibling node before it.
      */
     Node.prototype.indent = function(){
-        var prevNode = this.getRelativeNode('up')
-        // if is not the first node
-        if(this.row.previousSibling){
-            var prevNode = this.getRelativeNode('before');
-            this.parent.removeChildAndDom(this);
-            prevNode.appendChild(this);
-            this.parent = prevNode;
-            this.focus(this.contentElement);
+        var prevNode = this.getRelativeNode('prev')
+        if(prevNode){
+            this.parent.removeChildAndDom(this)
+            prevNode.appendChild(this)
+            this.parent = prevNode
+            this.focus(this.contentElement)
         }
         this.onValueChange(this.parent);
     };
