@@ -497,9 +497,12 @@ define(['./util'],function(util){
             // get previous sibling node
             // or parent node if this is the first child
             case 'up':
-                if(this.index == 0){
-
+                if(this.index == 0 && !this.isRootNode){
+                    return this.parent
+                }else{
+                    return this.parent.childs[this.index-1]
                 }
+                break
         }
     };
     /**
